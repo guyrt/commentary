@@ -1,5 +1,6 @@
 import { normalize, parse, join, sep } from "path";
 import fs = require("fs");
+import * as vscode from 'vscode';
 import { IParsedPath } from "./models";
 
 export function findGitRoot(filePath : string) : IParsedPath {
@@ -29,7 +30,20 @@ export function findGitRoot(filePath : string) : IParsedPath {
 
 
 export function createRoot(path : IParsedPath) {
-    const fullpath = join(path.repositoryRoot, '.commentary', path.filePath);
+
+    const config = vscode.workspace.getConfiguration("commentary");
+    const useGlobalRoot = config.get("useGlobalRoot");
+    let fullpath = "";
+    if (useGlobalRoot) {
+        fullpath = config.get("globalRoot") || "";
+        if (fullpath === "") {
+            throw new Error("Cannot set empty global root.");
+        }
+
+        fullpath = join(fullpath, path.filePath);
+    } else {
+        fullpath = join(path.repositoryRoot, '.commentary', path.filePath);
+    }
     fs.mkdirSync(fullpath, {
         recursive: true
     });

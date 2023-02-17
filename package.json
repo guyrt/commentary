@@ -16,7 +16,22 @@
         "command": "commentary.showCommentary",
         "title": "Commentary"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "commentary",
+      "properties": {
+        "commentary.useGlobalRoot": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use a global root folder. Defaults to ~/.commentary"
+        },
+        "commentary.globalRoot": {
+          "type": "string",
+          "default": "~/.commentary",
+          "description": "Location of a global root directory. Plays nice with others, but will make directories."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
