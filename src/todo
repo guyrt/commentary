@@ -4,3 +4,5 @@ figure out how to link the two file movements?
 within commentary commands:
     seek to line/file
     cross-links/breadcrumbs
+
+if you run commentary inside commentary folder don't allow it. no recursive commentary

@@ -3,8 +3,10 @@ import fs = require("fs");
 import * as vscode from 'vscode';
 import { IParsedPath } from "./models";
 import { homedir } from "os";
+import { Uri } from "vscode";
 
-export function findGitRoot(filePath : string) : IParsedPath {
+
+function findGitRoot(filePath : string) : IParsedPath {
     filePath = normalize(filePath);
     const parsedPath = parse(filePath);
     const dir = parsedPath.dir.split(sep);
@@ -19,7 +21,7 @@ export function findGitRoot(filePath : string) : IParsedPath {
                 repositoryRoot: potentialRoot,
                 repositoryHasCommentary: fs.existsSync(join(potentialRoot, ".commentary")),
                 repositoryRootFolderName: dir.pop() ?? "",
-                fileName: `${parsedPath.name}${parsedPath.ext}.md`
+                fileName: `${parsedPath.name}${parsedPath.ext}`
             };
         };
     }
@@ -51,24 +53,36 @@ function createPath(path : IParsedPath) {
             throw new Error("Cannot set empty global root.");
         }
 
-        fullpath = join(fullpath, path.repositoryRootFolderName, path.filePath);
+        fullpath = join(fullpath, path.repositoryRootFolderName);
     } else {
-        fullpath = join(path.repositoryRoot, '.commentary', path.filePath);
+        fullpath = join(path.repositoryRoot, '.commentary');
     }
+
+    fullpath = join(fullpath, path.filePath, path.fileName);
+
     return fullpath;
 }
 
 
-export function createFile(path : IParsedPath, defaultContent = "" ) {
+function createFile(path : IParsedPath, filename: string, defaultContent = "" ) : string{
 
     const fullpath = createPath(path);
 
     fs.mkdirSync(fullpath, {
         recursive: true
     });
-    const fileName = join(fullpath, path.fileName);
+    const fileName = join(fullpath, filename);
     if (!fs.existsSync(fileName)) {
         fs.writeFileSync(fileName, defaultContent);
     }
     return fileName;
+}
+
+
+export function createCommentaryFile(docUri : Uri, fileName : string) : string {
+        // get the commentary doc location
+    const gitRoot = findGitRoot(docUri.fsPath);
+
+    const commentaryFile = createFile(gitRoot, fileName);
+    return commentaryFile;
 }
